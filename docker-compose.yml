@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  redis:
+    image: redis
+    volumes:
+      - 'redis-data:/data'
+
+  api:
+    build:
+      context: '.'
+    depends_on:
+      - redis
+    ports:
+      - '127.0.0.1:8000:8000'
+
+  worker:
+    build:
+      context: '.'
+    command: celery worker -B -l info -A slabot.tasks
+    depends_on:
+      - 'api'
+      - 'redis'
+
+volumes:
+  redis-data:

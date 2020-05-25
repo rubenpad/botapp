@@ -11,6 +11,7 @@ autopep8 = "*"
 tornado = "==6.0.4"
 celery = "==4.4.2"
 redis = "==3.2.1"
+slackclient = "==2.6.1"
 
 [requires]
 python_version = "3.8"

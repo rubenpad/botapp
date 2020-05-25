@@ -1,8 +1,13 @@
+import os
+
+from slack import WebClient
 from tornado.options import define, options, parse_command_line
 import tornado.web
 import tornado.ioloop
 
 from tasks import greeting
+
+slack_web_client = WebClient(token=os.getenv('SLACK_BOT_TOKEN'))
 
 
 # Define possible command line arguments to pass
@@ -30,12 +35,17 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self):
         greeting.delay('anyone')
-        self.write('Hello')
+        self.write({
+            'ok': True,
+            'message': 'Slack bot is working'
+        })
 
 
-def make_app():
-    """Creates a tornado app"""
-    return
+class SaveQuoteCommandHandler(tornado.web.RequestHandler):
+    """Handle actions when an user call the command savequote"""
+
+    def post(self):
+        print(self.request)
 
 
 def main():
@@ -45,6 +55,7 @@ def main():
         # Routes
         [
             (r'/', MainHandler),
+            (r'/api/savequote', SaveQuoteCommandHandler)
         ],
         # Settings
         debug=options.debug,
