@@ -8,6 +8,6 @@ app = Celery('tasks', broker=CELERY_BROKER_URL)
 app.conf.timezone = 'America/Bogota'
 
 
-@app.task(name='greeting')
-def greeting(name):
-    print(f'Hello, {name}')
+@app.task(name='savequote')
+def savequote(username, quote):
+    print(f'{username} says {quote}')

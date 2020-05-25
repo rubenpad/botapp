@@ -1,11 +1,12 @@
 import os
+from urllib.parse import parse_qs
 
 from slack import WebClient
 from tornado.options import define, options, parse_command_line
 import tornado.web
 import tornado.ioloop
 
-from tasks import greeting
+from tasks import savequote
 
 slack_web_client = WebClient(token=os.getenv('SLACK_BOT_TOKEN'))
 
@@ -45,7 +46,20 @@ class SaveQuoteCommandHandler(tornado.web.RequestHandler):
     """Handle actions when an user call the command savequote"""
 
     def post(self):
-        print(self.request)
+        # Get data sent by slack in request object
+        bytes_data = self.request.body
+
+        # Decoded data to transform it into a dict
+        decoded_data = bytes_data.decode('utf-8')
+        payload = parse_qs(decoded_data)
+
+        # Get data from user that triggered the commnad
+        user_name = payload['user_name'][0]
+        quote = payload['text'][0]
+
+        self.set_status(200)
+
+        savequote.delay(username=user_name, quote=quote)
 
 
 def main():

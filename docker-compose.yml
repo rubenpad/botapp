@@ -17,6 +17,8 @@ services:
   worker:
     build:
       context: '.'
+    environment:
+      - CELERY_BROKER_URL='redis://redis:6379/0'
     command: celery worker -B -l info -A slabot.tasks
     depends_on:
       - 'api'
