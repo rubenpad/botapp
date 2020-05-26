@@ -1,7 +1,7 @@
 """Define task to run with celery"""
 import os
 import json
-from random import choice
+from random import choice, randint
 from bson.json_util import dumps
 from celery import Celery
 from dotenv import load_dotenv

@@ -4,6 +4,7 @@ from urllib.parse import parse_qs
 from dotenv import load_dotenv
 from slack import WebClient
 from tornado.options import define, options, parse_command_line
+from tornado import httpclient
 import tornado.web
 import tornado.ioloop
 
@@ -87,13 +88,16 @@ class QuoteHandler(tornado.web.RequestHandler):
         decoded_data = bytes_data.decode('utf-8')
         payload = parse_qs(decoded_data)
 
-        # Get data from user that triggered the commnad
-        channel_id = payload['channel_id'][0]
+        try:
+            # Run the task to get a random quote and
+            # wait until it finish to return the value
+            response = quote.delay().get()
+            text = f'@{response["author"]} says {response["quote"]}'
 
-        # Run the task to get a random quote
-        response = quote.delay().ready()
+            self.write(text)
 
-        print(response)
+        except IndexError:
+            self.write("Oops! There aren't saved quotes")
 
 
 def main():
