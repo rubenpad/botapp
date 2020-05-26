@@ -34,19 +34,19 @@
 
 1. Clone the repository
    
-  `git clone git@github.com:rubbenpad/botapp.git`
+    `git clone git@github.com:rubbenpad/botapp.git`
 
 2. Navigate into new folder create
 
-  `cd botapp`
+    `cd botapp`
 
 3. Run docker-compose
 
-  `docker-compose up --build -d`
+    `docker-compose up --build -d`
 
 4. Run in another terminal the next command to expose our local web sever
 
-  `ngrok http 8000`
+    `ngrok http 8000`
 
 5. To run the commands in Slack channel you need to register the URL given for ngrok in Slack commands settings
 
