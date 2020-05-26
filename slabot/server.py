@@ -1,12 +1,16 @@
 import os
 from urllib.parse import parse_qs
 
+from dotenv import load_dotenv
 from slack import WebClient
 from tornado.options import define, options, parse_command_line
 import tornado.web
 import tornado.ioloop
 
-from tasks import savequote
+from tasks import savequote, quote
+
+# Load environment variables
+load_dotenv()
 
 slack_web_client = WebClient(token=os.getenv('SLACK_BOT_TOKEN'))
 
@@ -32,10 +36,9 @@ define(
 
 
 class MainHandler(tornado.web.RequestHandler):
-    """Send a hello world message"""
+    """Test if api is working"""
 
     def get(self):
-        greeting.delay('anyone')
         self.write({
             'ok': True,
             'message': 'Slack bot is working'
@@ -43,9 +46,13 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 class SaveQuoteCommandHandler(tornado.web.RequestHandler):
-    """Handle actions when an user call the command savequote"""
+    """Handle the request to slack command /savequote"""
 
     def post(self):
+        # Slack need to know if the server is proccessing the
+        # request, to inform that we send a 200 status code
+        self.set_status(200)
+
         # Get data sent by slack in request object
         bytes_data = self.request.body
 
@@ -57,9 +64,36 @@ class SaveQuoteCommandHandler(tornado.web.RequestHandler):
         user_name = payload['user_name'][0]
         quote = payload['text'][0]
 
+        data_to_save = {
+            'author': user_name,
+            'quote': quote
+        }
+
+        savequote.delay(data=data_to_save)
+
+
+class QuoteHandler(tornado.web.RequestHandler):
+    """Handle the request for slack command /quote"""
+
+    def post(self):
+        # Slack need to know if the server is proccessing the
+        # request, to inform that we send a 200 status code
         self.set_status(200)
 
-        savequote.delay(username=user_name, quote=quote)
+        # Get data sent by slack in request object
+        bytes_data = self.request.body
+
+        # Decoded data to transform it into a dict
+        decoded_data = bytes_data.decode('utf-8')
+        payload = parse_qs(decoded_data)
+
+        # Get data from user that triggered the commnad
+        channel_id = payload['channel_id'][0]
+
+        # Run the task to get a random quote
+        response = quote.delay().ready()
+
+        print(response)
 
 
 def main():
@@ -69,7 +103,8 @@ def main():
         # Routes
         [
             (r'/', MainHandler),
-            (r'/api/savequote', SaveQuoteCommandHandler)
+            (r'/api/quote', QuoteHandler),
+            (r'/api/savequote', SaveQuoteCommandHandler),
         ],
         # Settings
         debug=options.debug,

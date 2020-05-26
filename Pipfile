@@ -9,9 +9,14 @@ autopep8 = "*"
 
 [packages]
 tornado = "==6.0.4"
-celery = "==4.4.2"
-redis = "==3.2.1"
 slackclient = "==2.6.1"
+python-dotenv = "==0.13.0"
+dnspython = "==1.16.0"
+redis = "==3.3.11"
+celery= "==4.4.0"
+pymongo = "==3.10.1"
+autopep8 = "*"
+pylint = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.8.0"

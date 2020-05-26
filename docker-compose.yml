@@ -4,12 +4,23 @@ services:
   redis:
     image: redis
     volumes:
-      - 'redis-data:/data'
+      - redis-data:/data
+
+  mongo:
+    image: mongo
+    ports:
+      - '27017-27019:27017-27019'
+    volumes:
+      - mongo-data:/data/db
 
   api:
     build:
       context: '.'
+    environment:
+      - MONGO_URI='mongodb://mongo:27017/'
+      - CELERY_BROKER_URL='redis://redis:6379/0'
     depends_on:
+      - mongo
       - redis
     ports:
       - '127.0.0.1:8000:8000'
@@ -17,12 +28,10 @@ services:
   worker:
     build:
       context: '.'
-    environment:
-      - CELERY_BROKER_URL='redis://redis:6379/0'
-    command: celery worker -B -l info -A slabot.tasks
+    command: celery worker -l info -A slabot.tasks
     depends_on:
-      - 'api'
-      - 'redis'
+      - api
 
 volumes:
   redis-data:
+  mongo-data:
