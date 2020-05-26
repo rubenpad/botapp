@@ -81,13 +81,6 @@ class QuoteHandler(tornado.web.RequestHandler):
         # request, to inform that we send a 200 status code
         self.set_status(200)
 
-        # Get data sent by slack in request object
-        bytes_data = self.request.body
-
-        # Decoded data to transform it into a dict
-        decoded_data = bytes_data.decode('utf-8')
-        payload = parse_qs(decoded_data)
-
         try:
             # Run the task to get a random quote and
             # wait until it finish to return the value
