@@ -17,17 +17,22 @@ services:
     build:
       context: '.'
     environment:
-      - MONGO_URI='mongodb://mongo:27017/'
-      - CELERY_BROKER_URL='redis://redis:6379/0'
+      - MONGO_URI=mongodb://mongo:27017/
+      - CELERY_BROKER_URL=redis://redis:6379/0
     depends_on:
       - mongo
       - redis
+    env_file:
+      - .env
     ports:
       - '127.0.0.1:8000:8000'
 
   worker:
     build:
       context: '.'
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/
+      - CELERY_BROKER_URL=redis://redis:6379/0
     command: celery worker -l info -A slabot.tasks
     depends_on:
       - api

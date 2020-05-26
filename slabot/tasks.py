@@ -7,11 +7,14 @@ from celery import Celery
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
+# Load environment variables
+load_dotenv()
+
 # Celery settings
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 
 # Mongo connection settings
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+MONGO_URI = os.getenv('MONGO_URI')
 
 app = Celery(
     'tasks',
@@ -46,10 +49,15 @@ def quote():
         # Transform quotes json into a list
         quotes_list = json.loads(data)
 
+        # If there aren't saved quotes return a empty dict
+        # to avoid raise IndexError with choice function
+        if len(quotes_list) == 0:
+            return {}
+
         # Choose a random quote
         random_quote = choice(quotes_list)
 
-    return {
-        'author': random_quote['author'],
-        'quote': random_quote['quote'],
-    }
+        return {
+            'author': random_quote['author'],
+            'quote': random_quote['quote'],
+        }

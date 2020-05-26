@@ -81,16 +81,17 @@ class QuoteHandler(tornado.web.RequestHandler):
         # request, to inform that we send a 200 status code
         self.set_status(200)
 
+        # Run the task to get a random quote and
+        # wait until it finish to return the value
+        response = quote.delay().get()
+
         try:
-            # Run the task to get a random quote and
-            # wait until it finish to return the value
-            response = quote.delay().get()
             text = f'@{response["author"]} says {response["quote"]}'
-
             self.write(text)
-
-        except IndexError:
-            self.write("Oops! There aren't saved quotes")
+        except KeyError:
+            self.write(
+                "Oops! There aren't save quotes. Save a new one with /savequote command"
+            )
 
 
 def main():
